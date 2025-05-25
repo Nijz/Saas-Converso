@@ -42,7 +42,7 @@ const CompanionCards = ({id, name, topic, subject, duration, color}:CompanionCar
             </div>
 
             <Link href={`/companions/${id}`} className='w-full'> 
-                <button className='w-full bg-black text-white py-2 rounded-xl cursor-pointer justify-center'>
+                <button className='w-full btn-primary justify-center'>
                     Start Learning
                 </button>
             </Link>
