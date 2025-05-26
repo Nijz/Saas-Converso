@@ -24,8 +24,7 @@ import { subjects } from "@/constants"
 import { Textarea } from "@/components/ui/textarea"
 import { createCompanion } from "@/lib/actions/companion.actions"
 import { redirect } from "next/navigation"
-import { toast } from "sonner"
-
+import toast from "react-hot-toast"
 
 
 const formSchema = z.object({
@@ -52,12 +51,15 @@ const CompanionForm = () => {
     })
 
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
+        toast.loading("Creating companion...")
         const companion = await createCompanion(values);
         if (companion) {
-            toast.success(`Companion ${companion.name} created successfully`)
+            toast.dismiss();
+            toast.success("Companion created successfully");
             form.reset();
             redirect(`/companions/${companion.id}`)
         } else {
+            toast.dismiss();
             toast.error("Failed to create companion");
             redirect('/') 
         }

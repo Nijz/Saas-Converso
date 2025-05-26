@@ -9,6 +9,7 @@ import {
   UserButton,
 } from '@clerk/nextjs'
 
+
 const Navbar = () => {
     return (
         <nav className='navbar'>
