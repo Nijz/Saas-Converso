@@ -36,6 +36,18 @@ export const getAllCompanions = async ({limit = 10, page = 1, subject, topic}:Ge
     if (error) {
         throw new Error(`Error fetching companions: ${error.message}`);
     }
-    
+
+    return data;
+}
+
+export const getCompanion = async (id: string) => {
+
+    const supabase = createSupabaseClient();
+    const { data, error } = await supabase.from("companions").select().eq('id', id).single();
+
+    if (error) {
+        throw new Error(`Error fetching companion: ${error.message}`);
+    }
+
     return data;
 }
