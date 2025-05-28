@@ -1,10 +1,15 @@
 import CompanionCards from '@/components/companion/CompanionCards'
 import CompanionsList from '@/components/companion/CompanionsList'
 import Cta from '@/components/companion/Cta'
-import { recentSessions } from '@/constants'
+import { getAllCompanions, getRecentSessions } from '@/lib/actions/companion.actions'
+import { getSubjectColor } from '@/lib/utils'
 import React from 'react'
 
-const Page = () => {
+const Page = async () => {
+
+  const companions = await getAllCompanions({limit: 3}) 
+  const recentSessions = await getRecentSessions(10)
+
   return (
     <main>
       
@@ -12,32 +17,20 @@ const Page = () => {
       
       <section className=' home-section'>
         
-        <CompanionCards
-          id="123"
-          name="Neura the Brainy Explorer"
-          topic="Neural Network of Brain"
-          subject="Science"
-          duration={45}
-          color="#ffda6e"
-        />
+        {
+          companions.length > 0 && companions.map((companion) => (
+            <CompanionCards
+              id={companion.id}
+              key={companion.id}
+              name={companion.name}
+              topic={companion.topic}
+              subject={companion.subject}
+              duration={companion.duration}
+              color={getSubjectColor(companion.subject)}
+            />
+          ))
+        }
 
-        <CompanionCards
-          id="456"
-          name="Countsy the number wizard"
-          topic="Derivatives and Integrals"
-          subject="Maths"
-          duration={30}
-          color="#e5d0ff"
-        />
-
-        <CompanionCards
-          id="789"
-          name="Verba the Language Master"
-          topic="English Grammar"
-          subject="Language"
-          duration={30}
-          color="#bde7ff"
-        />
       </section>
 
       <section className='home-section'>
