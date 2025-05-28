@@ -24,28 +24,45 @@ const CompanionComponent = ({ companionId, subject, name, topic, userImage, user
     const lottieRef = useRef<LottieRefCurrentProps>(null);
 
     const toggleMicrophone = () => {
-        const isMute = vapi.isMuted()
-        vapi.setMuted(!isMute);
-        setIsMuted(!isMuted)
+        try {
+            const isMute = vapi.isMuted()
+            vapi.setMuted(!isMute);
+            setIsMuted(!isMuted)
+        } catch (error) {
+            console.log(`Error toggling microphone: ${error}`);
+            toast.error(`Try connecting to companion first`);
+        }
     }
 
     const handleDisconnect = async () => {
-        setCallStatus(CallStatus.FINISHED);
-        vapi.stop();
+        try {
+            setCallStatus(CallStatus.FINISHED);
+            vapi.stop();
+            toast.success('Disconnected from companion');
+        } catch (error) {
+            toast.error(`${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
     }
 
     const handleConnect = async () => {
-        setCallStatus(CallStatus.CONNECTING);
-        const assistantOverride = {
-            variableValues: {
-                subject, topic, style
-            },
-            clientMessages: ['transcript'],
-            serverMessages: []
-        }
+        try {
+            toast.loading('Connecting to companion...');
+            setCallStatus(CallStatus.CONNECTING);
+            const assistantOverride = {
+                variableValues: {
+                    subject, topic, style
+                },
+                clientMessages: ['transcript'],
+                serverMessages: []
+            }
 
-        //@ts-expect-error let it be
-        vapi.start(configureAssistant(voice, style), assistantOverride)
+            //@ts-expect-error let it be
+            vapi.start(configureAssistant(voice, style), assistantOverride)
+            toast.dismiss();
+            toast.success('Connected to companion');
+        } catch (error) {
+            toast.error(`${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
     }
 
     useEffect(() => {
@@ -138,7 +155,7 @@ const CompanionComponent = ({ companionId, subject, name, topic, userImage, user
                     <button 
                         onClick={callStatus === CallStatus.ACTIVE ? handleDisconnect : handleConnect}
                         className={cn('rounded-lg py-2 cursor-pointer transition-colors w-full text-white', 
-                        callStatus === CallStatus.ACTIVE ? 'bg-red-700' : 'bg-primary', callStatus === CallStatus.CONNECTING && 'animate-pulse'
+                        callStatus === CallStatus.ACTIVE ? 'bg-red-500' : 'bg-primary', callStatus === CallStatus.CONNECTING && 'animate-pulse'
                     )}>
                         { callStatus === CallStatus.ACTIVE ? "End session ": callStatus === CallStatus.CONNECTING ? "Connecting...": "Start session" }
                     </button>
@@ -147,22 +164,22 @@ const CompanionComponent = ({ companionId, subject, name, topic, userImage, user
             <section className='transcript'>
                 <div className='transcript-message no-scrollbar'>
                     {
-                        messages.map((item) => {
+                        messages.map((item, index) => {
                             if(item.role === 'assistant') {
                                 return (
-                                    <p key={item.content} className='max-sm:text-sm'>
+                                    <p key={index} className='max-sm:text-sm'>
                                         {name.split(' ')[0].replace('/[.,]/g', '')}: {item.content}
                                     </p>
                                 )
                             } else {
-                                return (<p className='text-primary max-sm:text-sm' key={item.content}>
+                                return (<p className='text-primary max-sm:text-sm' key={index}>
                                     {userName} : {item.content}
                                 </p> )
                             }
                         })
                     }
                 </div>
-                <div className='transcript-fade'/>
+                <div className='transcript-fade' style={{ opacity: callStatus === CallStatus.ACTIVE ? 1 : 0 }}/>
             </section>
         </section>
     )
